@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文案安检 · 多平台发布前合规检测</title>
+<meta name="description" content="本地离线文案合规检测：小红书/抖音/公众号/视频号违禁词检测、变体词识别、AI 标注自查、发布前起量自检。内容不出本机。">
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--line:#e3e6ea;--txt:#1f2329;--sub:#6b7280;--red:#d93026;--orange:#e8890c;--blue:#1f6feb;--green:#2da44e;--tag:#eef1f5}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;padding:24px 16px}
+.wrap{max-width:880px;margin:0 auto}
+header{text-align:center;margin-bottom:20px}
+header h1{font-size:26px;font-weight:700}
+header p{color:var(--sub);font-size:13px;margin-top:4px}
+.badge{display:inline-block;background:var(--tag);border:1px solid var(--line);border-radius:20px;padding:2px 12px;font-size:12px;color:var(--sub);margin:6px 4px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:16px}
+.card h2{font-size:16px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.card h2 .n{background:var(--blue);color:#fff;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chips button{background:var(--tag);border:1px solid var(--line);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:13px;color:var(--sub)}
+.chips button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.platforms{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.platforms label{display:inline-flex;align-items:center;gap:5px;background:var(--tag);border:1px solid var(--line);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:14px}
+.platforms input{accent-color:var(--blue)}
+textarea{width:100%;min-height:130px;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:14px;font-family:inherit;resize:vertical}
+textarea:focus{outline:2px solid var(--blue);border-color:transparent}
+.row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.btn{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:9px 22px;font-size:14px;cursor:pointer}
+.btn:hover{opacity:.9}
+.btn.ghost{background:#fff;color:var(--txt);border:1px solid var(--line)}
+.btn.green{background:var(--green)}
+.stat{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+.stat div{background:var(--tag);border-radius:8px;padding:6px 14px;font-size:13px}
+.stat b{font-size:18px;margin-right:4px}
+.hit{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:8px;font-size:14px}
+.hit .w{font-weight:700}
+.lv-hard{color:var(--red)}.lv-soft{color:var(--orange)}.lv-context{color:var(--blue)}
+.tag{display:inline-block;border-radius:4px;padding:1px 8px;font-size:12px;color:#fff;margin-left:6px}
+.tag-hard{background:var(--red)}.tag-soft{background:var(--orange)}.tag-context{background:var(--blue)}
+.industry{display:inline-block;border-radius:4px;padding:1px 6px;font-size:11px;color:var(--sub);border:1px solid var(--line);margin-left:4px}
+.replace{background:var(--tag);border-radius:6px;padding:6px 10px;margin-top:6px;font-size:13px}
+.replace input{border:1px solid var(--line);border-radius:6px;padding:3px 8px;font-size:13px;width:200px}
+.replace button{background:#fff;border:1px solid var(--line);border-radius:6px;padding:3px 10px;cursor:pointer;font-size:13px}
+pre.result{background:#0f172a;color:#e2e8f0;border-radius:8px;padding:12px;font-size:13px;white-space:pre-wrap;word-break:break-all;margin-top:10px;display:none;max-height:400px;overflow:auto}
+ul.clean{list-style:none}
+ul.clean li{padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px;display:flex;gap:8px;align-items:flex-start}
+ul.clean input{margin-top:4px}
+ul.clean .desc{color:var(--sub);font-size:12px;margin-left:auto;text-align:right;flex-shrink:0;max-width:55%}
+.custom-box{border:1px dashed var(--line);border-radius:8px;padding:10px;margin-top:10px}
+.custom-box input{border:1px solid var(--line);border-radius:6px;padding:5px 10px;font-size:13px;width:220px}
+.custom-item{display:inline-flex;align-items:center;gap:6px;background:var(--tag);border-radius:6px;padding:3px 10px;font-size:12px;margin:4px 6px 0 0}
+.custom-item button{background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;line-height:1}
+.tip{color:var(--sub);font-size:12px;margin-top:6px}
+.foot{text-align:center;color:var(--sub);font-size:12px;margin-top:20px}
+.filebtn{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer;color:var(--txt)}
+.updated{color:var(--sub);font-size:12px;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>文案安检</h1>
+  <p>发布前全流程合规检测 · 本地离线 · 内容不出本机</p>
+  <span class="badge">小红书 / 抖音 / 公众号 / 视频号</span>
+  <span class="badge">违禁词 + 变体词 + AI 标注 + 起量自检</span>
+  <span class="badge">自定义词库 · 批量检测 · 行业筛选</span>
+  <div class="updated" id="dictMeta">词库加载中…</div>
+</header>
+
+<div class="card">
+  <h2><span class="n">1</span>选择检测平台</h2>
+  <div class="platforms" id="platforms"></div>
+  <h2 style="margin-top:8px"><span class="n">2</span>行业筛选（可多选，默认全行业）</h2>
+  <div class="chips" id="indChips"></div>
+</div>
+
+<div class="card">
+  <h2><span class="n">3</span>粘贴文案（标题 + 正文一起贴进来）</h2>
+  <textarea id="text" placeholder="把要发布的标题和正文都粘贴到这里，一次检测全要素…&#10;&#10;【批量模式】多篇文案之间用 --- （三个短横线单独一行）分隔，会逐篇出结果&#10;例如：&#10;第一篇文案内容…&#10;---&#10;第二篇文案内容…"></textarea>
+  <div class="row">
+    <button class="btn" onclick="runCheck()">开始检测</button>
+    <button class="btn ghost" onclick="document.getElementById('text').value=''">清空</button>
+    <label class="filebtn">加载词库 JSON<input type="file" accept=".json" style="display:none" onchange="loadDict(event)"></label>
+    <button class="btn ghost" onclick="loadSample()">示例：综合</button>
+    <button class="btn ghost" onclick="loadSample('medical')">示例：医疗</button>
+    <button class="btn ghost" onclick="loadSample('edu')">示例：教育</button>
+    <button class="btn ghost" onclick="loadSample('finance')">示例：金融</button>
+    <button class="btn ghost" onclick="loadSample('ecom')">示例：电商</button>
+  </div>
+  <div class="stat" id="stat" style="display:none"></div>
+  <div id="hits"></div>
+</div>
+
+<div class="card">
+  <h2><span class="n">4</span>自定义词库（本地保存，只在你自己的电脑上）</h2>
+  <div class="custom-box">
+    <input id="customWord" placeholder="输入你要自查的词，如：我们品牌名/行业黑话">
+    <input id="customReplace" placeholder="替换建议（可选）" style="width:200px">
+    <button class="btn ghost" onclick="addCustom()">添加</button>
+    <div id="customList" class="tip">还没有自定义词。把你行业里容易被误判的词加进来，安检会一起查。</div>
+  </div>
+</div>
+
+<div class="card" style="display:none" id="aiCard">
+  <h2><span class="n">5</span>AI 生成内容标注自查（<span style="color:var(--sub);font-size:12px">对照《人工智能生成合成内容标识办法》2026-06-14</span>）</h2>
+  <ul class="clean" id="aiList"></ul>
+  <div id="aiScore" style="margin-top:8px;font-size:14px"></div>
+</div>
+
+<div class="card">
+  <h2><span class="n">6</span>发布前自检清单（合规 + 起量双检）</h2>
+  <ul class="clean" id="ckList"></ul>
+  <div id="ckScore" style="margin-top:8px;font-size:14px"></div>
+</div>
+
+<div class="card">
+  <h2><span class="n">7</span>安检报告</h2>
+  <div class="row">
+    <button class="btn ghost" onclick="genReport()">生成报告（可复制）</button>
+    <button class="btn ghost" onclick="downloadReport()">下载报告 .md</button>
+    <button class="btn green" onclick="genAIPrompt()">复制「AI 改写指令」</button>
+    <span class="tip" style="align-self:center">AI 改写指令：把原文+命中词复制给你的 AI 工具，让它按合规要求改写</span>
+  </div>
+  <pre class="result" id="report"></pre>
+</div>
+
+<div class="foot">文案安检 v0.2 · 词库为社区整理稿，以各平台官方规则为准 · 检测全部在本机完成 · 自定义词只存本机浏览器</div>
+</div>
+
+<script>
+// ===== 内置词库 v0.2（高频词；可加载 dict/words.json 扩充/替换）=====
+const BUILTIN = {
+  "meta": {
+    "version": "0.3.0",
+    "updated": "2026-08-27",
+    "note": "社区词库 v0.3：广告法极限词全集（公开标准）+ 高危行业深挖（医疗/财经/美妆/教育/电商）+ 高频导流词。以各平台官方规则为准。来源：新广告法禁用词公开整理、句易网/零克查词公开词表、自媒体合规资料、情报中枢供词。",
+    "count": "76 词 + 12 变体组 + 6 行业"
+  },
+  "platforms": [
+    "小红书",
+    "抖音",
+    "公众号",
+    "视频号"
+  ],
+  "industries": [
+    "通用",
+    "医疗",
+    "财经",
+    "美妆",
+    "教育",
+    "电商"
+  ],
+  "words": [
+    {
+      "word": "直播间",
+      "level": "context",
+      "platform": [
+        "小红书"
+      ],
+      "type": "导流词",
+      "industry": "电商",
+      "reason": "小红书禁第三方导流语境；抖音为正常业务词",
+      "replace": "主页/店铺/商品页"
+    },
+    {
+      "word": "加微信",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号"
+      ],
+      "type": "导流词",
+      "industry": "通用",
+      "reason": "平台禁止站外导流，AI 已能识别谐音变体",
+      "replace": "主页查看/私信联系"
+    },
+    {
+      "word": "微信号",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音"
+      ],
+      "type": "导流词",
+      "industry": "通用",
+      "reason": "第三方导流红线",
+      "replace": "主页/客服"
+    },
+    {
+      "word": "扫码",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音"
+      ],
+      "type": "导流词",
+      "industry": "电商",
+      "reason": "扫码导流站外属违规",
+      "replace": "查看主页/搜索店铺"
+    },
+    {
+      "word": "扣1",
+      "level": "soft",
+      "platform": [
+        "小红书"
+      ],
+      "type": "导流词",
+      "industry": "电商",
+      "reason": "小红书禁引流口令类表述",
+      "replace": "评论区交流"
+    },
+    {
+      "word": "点击链接",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音"
+      ],
+      "type": "导流词",
+      "industry": "电商",
+      "reason": "站外链接导流红线",
+      "replace": "主页查看"
+    },
+    {
+      "word": "私信我",
+      "level": "soft",
+      "platform": [
+        "小红书"
+      ],
+      "type": "导流词",
+      "industry": "电商",
+      "reason": "诱导私信导流需谨慎（平台抽查）",
+      "replace": "评论区交流"
+    },
+    {
+      "word": "最",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "广告法禁用极限用语（最高级/最佳/最优质等）",
+      "replace": "很/相当/我个人觉得"
+    },
+    {
+      "word": "最高级",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "广告法明令禁用最高级用语",
+      "replace": "高水准/领先水平"
+    },
+    {
+      "word": "最佳",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "广告法禁用的绝对化用语",
+      "replace": "很不错/值得一试"
+    },
+    {
+      "word": "最优",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "绝对化用语",
+      "replace": "较优/更好"
+    },
+    {
+      "word": "最先进",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "绝对化用语",
+      "replace": "较先进/前沿"
+    },
+    {
+      "word": "最优秀",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "绝对化用语",
+      "replace": "很优秀/表现不错"
+    },
+    {
+      "word": "最便宜",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "电商",
+      "reason": "广告法禁用绝对化比较",
+      "replace": "性价比高/价格实惠"
+    },
+    {
+      "word": "最新",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "\"最新\"需真实时点背书，无法证明时违规",
+      "replace": "近期/新出的"
+    },
+    {
+      "word": "最火",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "绝对化表述需数据支撑",
+      "replace": "人气不错/关注度高"
+    },
+    {
+      "word": "最受欢迎",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "绝对化用语",
+      "replace": "受欢迎/口碑好"
+    },
+    {
+      "word": "第一",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "广告法禁用的绝对化用语（如\"全网第一\"）",
+      "replace": "领先/靠前"
+    },
+    {
+      "word": "排名第一",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "排名类宣称需权威数据",
+      "replace": "排名靠前（需真实）"
+    },
+    {
+      "word": "销量第一",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "电商",
+      "reason": "销量排名宣称需数据背书",
+      "replace": "销量不错/热销中"
+    },
+    {
+      "word": "首选",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "\"首选\"类排他性表述需谨慎",
+      "replace": "可以考虑/值得关注"
+    },
+    {
+      "word": "唯一",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "排他性绝对用语",
+      "replace": "少见的/独有的"
+    },
+    {
+      "word": "独一无二",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "排他性表述",
+      "replace": "有自己的特色"
+    },
+    {
+      "word": "首屈一指",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "绝对化用语",
+      "replace": "很出色"
+    },
+    {
+      "word": "史无前例",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "绝对化用语",
+      "replace": "比较少见"
+    },
+    {
+      "word": "前无古人",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "绝对化用语",
+      "replace": "很少见"
+    },
+    {
+      "word": "顶级",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "绝对化用语",
+      "replace": "优质/高水准"
+    },
+    {
+      "word": "极品",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "极端化表述",
+      "replace": "很不错的"
+    },
+    {
+      "word": "极致",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "极端化表述易触发审核",
+      "replace": "出色/到位"
+    },
+    {
+      "word": "完美",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "绝对化承诺",
+      "replace": "很满意/接近理想"
+    },
+    {
+      "word": "空前",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "绝对化用语",
+      "replace": "难得的"
+    },
+    {
+      "word": "绝无仅有",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "绝对化用语",
+      "replace": "比较少"
+    },
+    {
+      "word": "绝对",
+      "level": "hard",
+      "platform": [
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "绝对化用语易触发虚假宣传判定",
+      "replace": "大概率/基本"
+    },
+    {
+      "word": "100%",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "绝对化承诺需可证明，通常难自证",
+      "replace": "接近/高比例"
+    },
+    {
+      "word": "永久",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "永久性承诺难自证",
+      "replace": "长期/持续"
+    },
+    {
+      "word": "万能",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "绝对化功能宣称",
+      "replace": "多用途/多功能"
+    },
+    {
+      "word": "疯了",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音"
+      ],
+      "type": "极限词",
+      "industry": "电商",
+      "reason": "促销夸张表述易触发审核",
+      "replace": "太划算/超值"
+    },
+    {
+      "word": "疯抢",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音"
+      ],
+      "type": "极限词",
+      "industry": "电商",
+      "reason": "促销夸张表述",
+      "replace": "热销/受欢迎"
+    },
+    {
+      "word": "秒杀",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "电商",
+      "reason": "促销极端表述需谨慎（电商合规）",
+      "replace": "限时优惠/特惠"
+    },
+    {
+      "word": "限时抢购",
+      "level": "soft",
+      "platform": [
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "电商",
+      "reason": "虚假紧迫感易被认定诱导",
+      "replace": "近期活动/优惠中"
+    },
+    {
+      "word": "全网最低",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "电商",
+      "reason": "广告法禁用绝对化比较",
+      "replace": "高性价比/优惠中"
+    },
+    {
+      "word": "史上",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "绝对化用语",
+      "replace": "今年来/近段时间"
+    },
+    {
+      "word": "国家级",
+      "level": "hard",
+      "platform": [
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "广告法禁止使用国家级用语",
+      "replace": "行业领先/专业认证（需真实）"
+    },
+    {
+      "word": "世界级",
+      "level": "hard",
+      "platform": [
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "通用",
+      "reason": "绝对化用语",
+      "replace": "行业先进水平"
+    },
+    {
+      "word": "专家推荐",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号"
+      ],
+      "type": "虚假宣传",
+      "industry": "通用",
+      "reason": "无资质背书易被认定虚假宣传",
+      "replace": "口碑分享/亲测"
+    },
+    {
+      "word": "纯天然",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "极限词",
+      "industry": "美妆",
+      "reason": "无产品能证明100%纯天然，已被列为违规极限词",
+      "replace": "成分简单/配方温和"
+    },
+    {
+      "word": "防癌",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "医疗违规",
+      "industry": "医疗",
+      "reason": "非正规药品提防癌属医疗违规",
+      "replace": "健康管理/定期体检"
+    },
+    {
+      "word": "治疗",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音"
+      ],
+      "type": "医疗违规",
+      "industry": "医疗",
+      "reason": "普通商品宣称治疗功效属违规",
+      "replace": "改善/缓解"
+    },
+    {
+      "word": "根治",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "医疗违规",
+      "industry": "医疗",
+      "reason": "根治类承诺属绝对化医疗宣称",
+      "replace": "改善/调理"
+    },
+    {
+      "word": "治愈",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "医疗违规",
+      "industry": "医疗",
+      "reason": "非医疗产品宣称治愈属违规",
+      "replace": "改善/缓解"
+    },
+    {
+      "word": "无副作用",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号"
+      ],
+      "type": "医疗违规",
+      "industry": "医疗",
+      "reason": "绝对化安全承诺，医疗产品禁止",
+      "replace": "耐受性好（需真实）"
+    },
+    {
+      "word": "立刻见效",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音"
+      ],
+      "type": "医疗违规",
+      "industry": "医疗",
+      "reason": "功效即时性承诺属虚假宣传",
+      "replace": "坚持使用/逐步改善"
+    },
+    {
+      "word": "见效快",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音"
+      ],
+      "type": "医疗违规",
+      "industry": "医疗",
+      "reason": "功效速度承诺需真实",
+      "replace": "坚持使用"
+    },
+    {
+      "word": "告别失眠",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音"
+      ],
+      "type": "医疗违规",
+      "industry": "医疗",
+      "reason": "\"告别疾病\"类宣称属医疗功效",
+      "replace": "改善睡眠质量"
+    },
+    {
+      "word": "祛斑",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音"
+      ],
+      "type": "医疗违规",
+      "industry": "美妆",
+      "reason": "祛斑类功效宣称需特殊资质",
+      "replace": "淡化/改善肤色"
+    },
+    {
+      "word": "祛痘",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音"
+      ],
+      "type": "医疗违规",
+      "industry": "美妆",
+      "reason": "祛痘功效宣称需合规",
+      "replace": "改善/护理"
+    },
+    {
+      "word": "美白",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音"
+      ],
+      "type": "医疗违规",
+      "industry": "美妆",
+      "reason": "美白功效宣称需合规备案",
+      "replace": "提亮/匀净肤色"
+    },
+    {
+      "word": "抗衰老",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音"
+      ],
+      "type": "医疗违规",
+      "industry": "美妆",
+      "reason": "抗衰功效宣称需资质",
+      "replace": "紧致/滋润"
+    },
+    {
+      "word": "包过",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号"
+      ],
+      "type": "虚假宣传",
+      "industry": "教育",
+      "reason": "\"包过\"类保证性承诺属虚假宣传",
+      "replace": "系统复习/查漏补缺"
+    },
+    {
+      "word": "必过",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号"
+      ],
+      "type": "虚假宣传",
+      "industry": "教育",
+      "reason": "通过率保证性承诺",
+      "replace": "认真备考/系统学习"
+    },
+    {
+      "word": "保录取",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号"
+      ],
+      "type": "虚假宣传",
+      "industry": "教育",
+      "reason": "录取保证性承诺违规",
+      "replace": "提高录取机会"
+    },
+    {
+      "word": "提分保证",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号"
+      ],
+      "type": "虚假宣传",
+      "industry": "教育",
+      "reason": "教育效果保证性承诺违规",
+      "replace": "学习方法/复习建议"
+    },
+    {
+      "word": "升学率",
+      "level": "soft",
+      "platform": [
+        "公众号"
+      ],
+      "type": "虚假宣传",
+      "industry": "教育",
+      "reason": "升学率宣传需真实数据背书",
+      "replace": "学习成果（需真实数据）"
+    },
+    {
+      "word": "押题",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号"
+      ],
+      "type": "虚假宣传",
+      "industry": "教育",
+      "reason": "考试押题承诺需谨慎（合规教育机构除外）",
+      "replace": "重点复习/真题演练"
+    },
+    {
+      "word": "稳赚不赔",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "财经违规",
+      "industry": "财经",
+      "reason": "收益保证类表述属金融违规",
+      "replace": "理性投资/注意风险"
+    },
+    {
+      "word": "保本",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号",
+        "视频号"
+      ],
+      "type": "财经违规",
+      "industry": "财经",
+      "reason": "近两年各平台重点排查的财经违规词",
+      "replace": "稳健/低波动"
+    },
+    {
+      "word": "稳赚",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号"
+      ],
+      "type": "财经违规",
+      "industry": "财经",
+      "reason": "收益保证类表述",
+      "replace": "理性看待收益"
+    },
+    {
+      "word": "高收益",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号"
+      ],
+      "type": "财经违规",
+      "industry": "财经",
+      "reason": "高收益承诺需风险提示",
+      "replace": "收益有波动"
+    },
+    {
+      "word": "翻倍",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号"
+      ],
+      "type": "财经违规",
+      "industry": "财经",
+      "reason": "收益翻倍类承诺需谨慎",
+      "replace": "明显增长（需真实）"
+    },
+    {
+      "word": "躺着赚钱",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音"
+      ],
+      "type": "财经违规",
+      "industry": "财经",
+      "reason": "被动收入夸张宣传",
+      "replace": "长期积累"
+    },
+    {
+      "word": "立即购买",
+      "level": "soft",
+      "platform": [
+        "公众号"
+      ],
+      "type": "导流词",
+      "industry": "电商",
+      "reason": "公众号内诱导下单需合规（广告法）",
+      "replace": "了解更多/查看详情"
+    },
+    {
+      "word": "减✨肥✨药",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音"
+      ],
+      "type": "变体词",
+      "industry": "医疗",
+      "reason": "emoji 分隔变体，平台 AI 已能识别",
+      "replace": "体重管理/健康饮食"
+    },
+    {
+      "word": "v信",
+      "level": "hard",
+      "platform": [
+        "小红书",
+        "抖音",
+        "公众号"
+      ],
+      "type": "变体词",
+      "industry": "通用",
+      "reason": "谐音变体导流，平台已识别",
+      "replace": "主页/私信"
+    },
+    {
+      "word": "zhuan米",
+      "level": "soft",
+      "platform": [
+        "小红书",
+        "抖音"
+      ],
+      "type": "变体词",
+      "industry": "财经",
+      "reason": "拼音变体（赚钱），疑似诱导",
+      "replace": "赚钱（正常表述）"
+    },
+    {
+      "word": "甩掉",
+      "level": "context",
+      "platform": [
+        "抖音"
+      ],
+      "type": "场景词",
+      "industry": "美妆",
+      "reason": "减肥语境下平台重点审查；健身日常语境正常",
+      "replace": "管理/改善"
+    },
+    {
+      "word": "钱",
+      "level": "context",
+      "platform": [
+        "公众号"
+      ],
+      "type": "场景词",
+      "industry": "财经",
+      "reason": "公众号内高收益承诺语境审查；日常语境正常",
+      "replace": "收益/回报"
+    }
+  ],
+  "variants": [
+    {
+      "base": "微信",
+      "patterns": [
+        "v信",
+        "威信",
+        "vx",
+        "薇❤",
+        "薇❤️",
+        "薇心",
+        "wx",
+        "薇x",
+        "卫星"
+      ]
+    },
+    {
+      "base": "赚钱",
+      "patterns": [
+        "zhuan米",
+        "转米",
+        "赚💰",
+        "zuan钱"
+      ]
+    },
+    {
+      "base": "减肥",
+      "patterns": [
+        "减✨肥✨药",
+        "减 肥 药",
+        "jian肥"
+      ]
+    },
+    {
+      "base": "加微信",
+      "patterns": [
+        "+v",
+        "➕v",
+        "加v"
+      ]
+    },
+    {
+      "base": "扫码",
+      "patterns": [
+        "s码",
+        "扫🐎"
+      ]
+    },
+    {
+      "base": "最",
+      "patterns": [
+        "zui好",
+        "zuijia",
+        "No.1",
+        "no.1"
+      ]
+    },
+    {
+      "base": "秒杀",
+      "patterns": [
+        "miaosha",
+        "秒💀"
+      ]
+    },
+    {
+      "base": "包过",
+      "patterns": [
+        "bao过",
+        "必过"
+      ]
+    },
+    {
+      "base": "免费",
+      "patterns": [
+        "免💰",
+        "mia飞"
+      ]
+    },
+    {
+      "base": "群",
+      "patterns": [
+        "q裙",
+        "Q裙",
+        "v裙"
+      ]
+    },
+    {
+      "base": "购买",
+      "patterns": [
+        "gou买",
+        "go买"
+      ]
+    },
+    {
+      "base": "私信",
+      "patterns": [
+        "s信",
+        "私❤"
+      ]
+    }
+  ],
+  "ai_annotation": {
+    "rule": "四部门《人工智能生成合成内容标识办法》2026-06-14 落地：AI 生成内容须显式标注，未合规不予分发",
+    "items": [
+      {
+        "id": "video_3s",
+        "label": "AI 视频开篇 3 秒内醒目标注（标识尺寸≥画面宽度 5%）"
+      },
+      {
+        "id": "image_declare",
+        "label": "AI 生成图片/图文勾选「AI 生成」声明（小红书/抖音发布页）"
+      },
+      {
+        "id": "original_off",
+        "label": "AI 内容禁止勾选「原创声明」"
+      },
+      {
+        "id": "voice_label",
+        "label": "AI 配音/换声需标注（短视频平台）"
+      }
+    ]
+  },
+  "checklist": [
+    {
+      "id": "kw_title",
+      "label": "标题/首句埋搜索词（赛道词前置）",
+      "score": "有赛道词=搜索流量入口"
+    },
+    {
+      "id": "cover",
+      "label": "首图冲击力：大字标题 40% + 场景截图 50% + 视觉钩子 10%",
+      "score": "高对比黑/白/黄"
+    },
+    {
+      "id": "hook",
+      "label": "正文前 3 秒/首行有互动钩子（提问/悬念/利益点）",
+      "score": "评论率是 CES 核心"
+    },
+    {
+      "id": "topic",
+      "label": "话题 3-6 个，含赛道词+场景词",
+      "score": "话题即搜索入口"
+    },
+    {
+      "id": "time",
+      "label": "发布时间窗口：早 7-9 / 午 12-14 / 晚 20-22",
+      "score": "爆款窗口"
+    },
+    {
+      "id": "end_question",
+      "label": "结尾提问引导评论（收藏率>点赞率时代）",
+      "score": "收藏率晋级核心指标"
+    },
+    {
+      "id": "keep7",
+      "label": "发布后 7 天不删，观察二次推流",
+      "score": "7 天长效赛马"
+    }
+  ]
+};
+
+
+};
+
+
+};
+
+let DICT = JSON.parse(JSON.stringify(BUILTIN));
+let selectedPlatforms = ["小红书","抖音","公众号","视频号"];
+let selectedIndustries = []; // 空=全行业
+let currentHits = [];
+let currentMode = "single"; // single | batch
+let batchResults = [];
+
+// 自定义词库（localStorage）
+function getCustom(){ try{return JSON.parse(localStorage.getItem("wajian_custom")||"[]");}catch(e){return [];} }
+function saveCustom(c){ localStorage.setItem("wajian_custom", JSON.stringify(c)); }
+
+function init(){
+  DICT.platforms.forEach(p=>{
+    const el=document.createElement("label");
+    el.innerHTML=`<input type="checkbox" checked onchange="togglePlat(this,'${p}')">${p}`;
+    document.getElementById("platforms").appendChild(el);
+  });
+  const inds=DICT.industries||[];
+  if(inds.length===0) inds.push("通用");
+  inds.forEach((ind,i)=>{
+    const b=document.createElement("button");
+    b.textContent=ind;
+    b.dataset.ind=ind;
+    if(i===0){b.classList.add("on"); selectedIndustries.push(ind);}
+    b.onclick=()=>toggleInd(b,ind);
+    document.getElementById("indChips").appendChild(b);
+  });
+  renderChecklist();
+  renderCustom();
+  document.getElementById("dictMeta").textContent=`词库 v${DICT.meta.version} · ${DICT.meta.updated} · ${DICT.words.length} 条规则 · 行业 ${(DICT.industries||[]).join("/")} · 可加载 dict/words.json 扩充`;
+}
+function togglePlat(cb,p){
+  if(cb.checked && !selectedPlatforms.includes(p)) selectedPlatforms.push(p);
+  if(!cb.checked) selectedPlatforms=selectedPlatforms.filter(x=>x!==p);
+}
+function toggleInd(btn,ind){
+  btn.classList.toggle("on");
+  if(selectedIndustries.includes(ind)) selectedIndustries=selectedIndustries.filter(x=>x!==ind);
+  else selectedIndustries.push(ind);
+}
+function loadDict(e){
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{try{
+    const j=JSON.parse(r.result);
+    if(j.words&&j.words.length){DICT=j;document.getElementById("dictMeta").textContent=`已加载自定义词库 ${f.name} · ${j.words.length} 条规则`;}
+    else alert("词库格式不对：需要 {words:[...]} 结构");
+  }catch(err){alert("词库 JSON 解析失败："+err.message);}};
+  r.readAsText(f);
+}
+function loadSample(type){
+  const samples={
+    general:"纯天然蜂蜜，全网最低价，史上最强配方！防癌抗老，加微信领取优惠，v信同号。减✨肥✨药一周见效，稳赚不赔，保本理财，专家推荐，包过必过。直播间有惊喜。",
+    medical:"这款产品根治失眠、告别焦虑，无副作用，立刻见效！国家级配方，专家推荐，治愈率 100%，永久有效，防癌抗老一步到位。",
+    edu:"跟着我们包过，必过！保录取，提分保证，押题率 90%，升学率全网第一，全国唯一指定教材，史无前例的教学方法。",
+    finance:"稳赚不赔，保本理财，高收益翻倍，躺着赚钱！全网最低费率，绝对安全，专家推荐，立即购买。",
+    ecom:"全网最低价！秒杀、疯抢、限时抢购，错过再等一年！扫码加微信领取优惠，v信同号，直播间下单，绝对正品。"
+  };
+  document.getElementById("text").value=samples[type]||samples.general;
+}
+// ===== 自定义词库 =====
+function renderCustom(){
+  const list=getCustom();
+  const box=document.getElementById("customList");
+  if(list.length===0){box.innerHTML="还没有自定义词。把你行业里容易被误判的词加进来，安检会一起查。";return;}
+  box.innerHTML="";
+  list.forEach((c,i)=>{
+    const s=document.createElement("span");
+    s.className="custom-item";
+    s.innerHTML=`${c.w}${c.r?` → ${c.r}`:""}<button onclick="delCustom(${i})">×</button>`;
+    box.appendChild(s);
+  });
+}
+function addCustom(){
+  const w=document.getElementById("customWord").value.trim();
+  if(!w){alert("请输入要添加的词");return;}
+  const r=document.getElementById("customReplace").value.trim();
+  const list=getCustom();
+  list.push({w,r});
+  saveCustom(list);
+  document.getElementById("customWord").value="";
+  document.getElementById("customReplace").value="";
+  renderCustom();
+}
+function delCustom(i){
+  const list=getCustom(); list.splice(i,1); saveCustom(list); renderCustom();
+}
+// ===== 检测核心 =====
+function norm(s){return s.replace(/[\s✨❤️💰➕]/g,"").toLowerCase();}
+function findVariants(text){
+  const found=[];
+  DICT.variants.forEach(v=>{
+    v.patterns.forEach(pat=>{
+      let idx=text.toLowerCase().indexOf(pat.toLowerCase());
+      while(idx!==-1){
+        found.push({base:v.base,raw:pat,pos:idx});
+        idx=text.toLowerCase().indexOf(pat.toLowerCase(),idx+pat.length);
+      }
+    });
+  });
+  return found;
+}
+function detectOne(text, customOnly){
+  const hits=[];
+  const dictWords = customOnly ? [] : DICT.words;
+  dictWords.forEach(w=>{
+    if(selectedIndustries.length>0 && w.industry && !selectedIndustries.includes(w.industry)) return;
+    const re=new RegExp(w.word.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi");
+    let m;
+    while((m=re.exec(text))!==null){
+      hits.push({word:w.word,level:w.level,type:w.type,reason:w.reason,replace:w.replace,platform:w.platform||[],industry:w.industry||"",pos:m.index,raw:m[0]});
+      if(re.lastIndex===m.index) re.lastIndex++;
+    }
+  });
+  if(!customOnly){
+    findVariants(text).forEach(v=>{
+      hits.push({word:v.base,level:"hard",type:"变体词",reason:`检测到变体写法「${v.raw}」，平台 AI 已能识别谐音/拼音/emoji 分隔`,replace:v.base,platform:["小红书","抖音","公众号","视频号"],industry:"通用",pos:v.pos,raw:v.raw,variant:true});
+    });
+  }
+  getCustom().forEach(c=>{
+    const re=new RegExp(c.w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi");
+    let m;
+    while((m=re.exec(text))!==null){
+      hits.push({word:c.w,level:"soft",type:"自定义词",reason:"自定义词库命中（需自查上下文）",replace:c.r||"自行判断",platform:selectedPlatforms,industry:"",pos:m.index,raw:m[0],custom:true});
+      if(re.lastIndex===m.index) re.lastIndex++;
+    }
+  });
+  return hits.filter(h=>{
+    if(h.custom) return true;
+    if(h.platform.length===0) return true;
+    const inPlat=h.platform.some(p=>selectedPlatforms.includes(p));
+    if(h.level==="context") return inPlat;
+    return inPlat;
+  }).sort((a,b)=>a.pos-b.pos);
+}
+// 输入清洗（可靠性：乱码/控制字符/零宽字符不干扰检测）
+function sanitize(s){
+  return s.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g,"")   // 控制字符
+          .replace(/\u200b|\u200c|\u200d|\ufeff/g,"")                        // 零宽/隐藏字符
+          .replace(/\r\n?/g,"\n");
+}
+function runCheck(){
+  let text=sanitize(document.getElementById("text").value);
+  if(!text.trim()){alert("请先粘贴文案");return;}
+  try{
+    const parts=text.split(/\n\s*-{3,}\s*\n/).map(s=>s.trim()).filter(Boolean);
+    currentMode = parts.length>1 ? "batch" : "single";
+    if(currentMode==="batch"){
+      batchResults=parts.map((p,i)=>({idx:i+1,text:p,hits:detectOne(p)}));
+      renderBatch();
+    }else{
+      currentHits=detectOne(text);
+      renderHits(text);
+    }
+    renderAI();
+    renderChecklist();
+    document.getElementById("aiCard").style.display="block";
+  }catch(err){
+    alert("检测出错："+err.message+"\n请确认输入内容正常后重试");
+  }
+}
+function lvText(l){return l==="hard"?"确定违规":l==="soft"?"疑似违规":"场景相关";}
+function hitHTML(h,i){
+  return `<div class="hit"><span class="w lv-${h.level}">${h.raw||h.word}</span><span class="tag tag-${h.level}">${lvText(h.level)} · ${h.type}</span>${h.industry?`<span class="industry">${h.industry}</span>`:""}<div style="color:var(--sub);font-size:13px;margin-top:3px">${h.reason}${h.platform.length?`<br>敏感平台：${h.platform.join(" / ")}`:""}</div><div class="replace">替换建议：<input id="rep-${i}" value="${h.replace||""}"><button onclick="applyReplace(${i},this,'${currentMode}')">一键替换</button></div></div>`;
+}
+function renderHits(text, label){
+  const box=document.getElementById("hits");
+  const stat=document.getElementById("stat");
+  if(currentHits.length===0){
+    box.innerHTML=`<div class="hit">✅ 未检测到所选平台词库中的问题词</div>`;
+    stat.style.display="none"; return;
+  }
+  const hard=currentHits.filter(h=>h.level==="hard").length;
+  const soft=currentHits.filter(h=>h.level==="soft").length;
+  const ctx=currentHits.filter(h=>h.level==="context").length;
+  stat.style.display="flex";
+  stat.innerHTML=`${label||""}<div>命中 <b>${currentHits.length}</b> 处</div><div>确定违规 <b style="color:var(--red)">${hard}</b></div><div>疑似 <b style="color:var(--orange)">${soft}</b></div><div>场景相关 <b style="color:var(--blue)">${ctx}</b></div>`;
+  box.innerHTML="";
+  currentHits.forEach((h,i)=>{ box.insertAdjacentHTML("beforeend", hitHTML(h,i)); });
+  window._lastText=text;
+}
+function renderBatch(){
+  const box=document.getElementById("hits");
+  const stat=document.getElementById("stat");
+  const total=batchResults.reduce((s,r)=>s+r.hits.length,0);
+  const hard=batchResults.reduce((s,r)=>s+r.hits.filter(h=>h.level==="hard").length,0);
+  stat.style.display="flex";
+  stat.innerHTML=`<div>批量 <b>${batchResults.length}</b> 篇</div><div>总命中 <b>${total}</b> 处</div><div>确定违规 <b style="color:var(--red)">${hard}</b></div>`;
+  box.innerHTML="";
+  batchResults.forEach((r,bi)=>{
+    const h2=document.createElement("div");
+    h2.style.cssText="margin:14px 0 6px;font-weight:700;font-size:14px;color:var(--blue)";
+    h2.textContent=`第 ${r.idx} 篇（命中 ${r.hits.length} 处）`;
+    box.appendChild(h2);
+    if(r.hits.length===0){ box.insertAdjacentHTML("beforeend",`<div class="hit">✅ 未命中</div>`); return; }
+    r.hits.forEach((h,i)=>{ box.insertAdjacentHTML("beforeend", hitHTML(h, `${bi}_${i}`)); });
+  });
+}
+function applyReplace(key,btn,mode){
+  const val=document.getElementById("rep-"+key).value;
+  let h;
+  if(mode==="batch"){ const [bi,i]=key.split("_").map(Number); h=batchResults[bi].hits[i]; }
+  else h=currentHits[key];
+  let t=document.getElementById("text").value;
+  t=t.replace(h.raw||h.word,val);
+  document.getElementById("text").value=t;
+  btn.textContent="已替换 ✓";
+  setTimeout(()=>btn.textContent="一键替换",1500);
+}
+// ===== AI 标注自查 =====
+function renderAI(){
+  const list=document.getElementById("aiList");
+  const items=(DICT.ai_annotation&&DICT.ai_annotation.items)||[];
+  list.innerHTML=items.map((it,idx)=>`<li><input type="checkbox" id="ai-${idx}"><span>${it.label}</span></li>`).join("");
+  document.getElementById("aiScore").innerHTML="";
+}
+// ===== 自检清单 =====
+function renderChecklist(){
+  const items=(DICT.checklist)||[];
+  document.getElementById("ckList").innerHTML=items.map((it,idx)=>`<li><input type="checkbox" id="ck-${idx}"><span>${it.label}</span><span class="desc">${it.score}</span></li>`).join("");
+  document.getElementById("ckScore").textContent="勾选后点「生成检测报告」汇总";
+}
+// ===== 报告 =====
+function reportText(){
+  const text=document.getElementById("text").value.trim();
+  const aiItems=(DICT.ai_annotation&&DICT.ai_annotation.items)||[];
+  const ckItems=(DICT.checklist)||[];
+  const aiDone=aiItems.filter((_,i)=>document.getElementById("ai-"+i)&&document.getElementById("ai-"+i).checked).length;
+  const ckDone=ckItems.filter((_,i)=>document.getElementById("ck-"+i)&&document.getElementById("ck-"+i).checked).length;
+  const hits=currentMode==="batch"?batchResults.flatMap(r=>r.hits):currentHits;
+  const hard=hits.filter(h=>h.level==="hard").length;
+  const lines=[];
+  lines.push("==== 文案安检报告 ====");
+  lines.push("检测平台："+selectedPlatforms.join(" / ")+"　行业："+(selectedIndustries.length?selectedIndustries.join("/"):"全行业"));
+  lines.push("检测时间："+new Date().toLocaleString("zh-CN"));
+  lines.push("");
+  lines.push("【违禁词检测】"+hits.length+" 处命中（确定违规 "+hard+" / 疑似 "+hits.filter(h=>h.level==="soft").length+" / 场景相关 "+hits.filter(h=>h.level==="context").length+"）");
+  hits.slice(0,30).forEach(h=>lines.push(`- 「${h.raw||h.word}」[${lvText(h.level)}/${h.type}${h.industry?"/"+h.industry:""}] ${h.reason} → 建议：${h.replace||"改写"}`));
+  if(hits.length>30) lines.push(`… 共 ${hits.length} 处`);
+  lines.push("");
+  lines.push("【AI 标注自查】"+aiDone+"/"+aiItems.length+" 项已确认"+(aiDone===aiItems.length?" ✅":" ⚠️ 未完成"));
+  lines.push("【起量自检清单】"+ckDone+"/"+ckItems.length+" 项达标"+(ckDone>=5?" ✅":" ⚠️ 建议补强"));
+  lines.push("");
+  lines.push("⚠️ 词库为社区整理稿，以各平台官方规则为准；疑似/场景相关项请结合上下文人工判断。");
+  return lines.join("\n");
+}
+function genReport(){
+  const pre=document.getElementById("report");
+  pre.textContent=reportText();
+  pre.style.display="block";
+  pre.scrollIntoView({behavior:"smooth"});
+}
+function downloadReport(){
+  const blob=new Blob([reportText()],{type:"text/markdown;charset=utf-8"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`文案安检报告-${new Date().toISOString().slice(0,10)}.md`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function genAIPrompt(){
+  const text=document.getElementById("text").value.trim();
+  const hits=currentMode==="batch"?batchResults.flatMap(r=>r.hits):currentHits;
+  const hitList=hits.slice(0,20).map(h=>`「${h.raw||h.word}」[${lvText(h.level)}/${h.type}]：${h.reason} → 建议替换为 ${h.replace||"自行改写"}`).join("\n");
+  const prompt=`请帮我改写下面这段文案，要求：\n1. 保持原意和语气，但把所有可能违规的表述改成合规说法（不要用谐音/拼音/emoji 分隔规避，平台已能识别）\n2. 避免绝对化用语、医疗功效宣称、收益保证、导流词\n3. 输出改写后的完整文案，并列出修改了哪些词\n\n【原文】\n${text}\n\n【已检测到的风险点】\n${hitList||"未检测到风险点"}`;
+  navigator.clipboard.writeText(prompt).then(()=>{alert("AI 改写指令已复制，粘贴到你的 AI 工具即可");}).catch(()=>{alert("复制失败，请手动复制报告里的内容");});
+}
+init();
+</script>
+</body>
+</html>
